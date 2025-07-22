@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SiSADA - Home</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">🗑️<strong>SiSADA</strong></div>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <nav id="menu">
+      <a href="index.html" class="active">Home</a>
+      <a href="peta.html">Peta</a>
+      <a href="dashboard.html">Dashboard</a>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="overlay"></div>
+    <div class="hero-text">
+      <h1><span>SiSADA</span></h1>
+      <h2>Sistem Informasi Sampah Desa Demangan</h2>
+      <!--<p>Web untuk pelaporan sampah terpadu di Kemantren Gondokusuman</p> -->
+    </div>
+  </section>
+
+  <!-- Info Section -->
+  <section class="info-section">
+    <div class="info-container">
+      <!--<div class="info-image-wrapper">
+        <img src="img/sampah.jpg" alt="Gunungan sampah" class="info-image" /> -->
+      <div class="info-video-wrapper">
+        <iframe src="https://www.youtube.com/embed/4vo7hbSoLX0?si=e0LmgMyWjrzXJHZk" title="Video Informasi Sampah"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+      <div class="info-text">
+        <h2><strong>Sistem Informasi Sampah Desa Demangan</strong></h2>
+        <p>
+          SiSADA adalah platform WebGIS yang menyajikan informasi lokasi dan volume sampah di Desa Demangan. Melalui
+          peta interaktif, SiSADA membantu warga dan pemerintah desa memantau kondisi sampah, merencanakan pengelolaan
+          yang lebih efektif, serta mendorong partisipasi masyarakat dalam menjaga kebersihan lingkungan.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+<!-- Summary Cards Section -->
+<section class="summary-cards-section">
+  <h2><strong>Info Sampah</strong></h2>
+  <div class="summary-cards">
+    <div class="card-summary">
+      <h3>🏦 Bank Sampah</h3>
+      <p id="jumlahBankSampah">0</p>
+    </div>
+    <div class="card-summary">
+      <h3>🗑️ Total Sampah</h3>
+      <p id="totalVolumeSampah">0 Kg</p>
+    </div>
+    <div class="card-summary">
+      <h3>💰 Total Uang</h3>
+      <p id="totalHarga">Rp 0</p>
+    </div>
+  </div>
+</section>
+
+
+  <!-- Info Data Sampah Section -->
+  <div class="tabel-text">
+  <h2><strong>📊 Dashboard Bank Sampah Demangan</strong></h2>
+  </div>
+
+  <div class="filter-container">
+    <input type="text" id="filterNama" placeholder="Cari Nama Bank Sampah">
+
+    <select id="filterJenis">
+      <option value=""> ♻️Semua Jenis Sampah</option>
+      <option value="Plastik">Plastik</option>
+      <option value="Kertas">Kertas</option>
+      <option value="Kaca">Kaca</option>
+      <option value="Logam">Logam</option>
+      <option value="Jelantah">Jelantah</option>
+      <option value="Nasi Kering">Nasi Kering</option>
+    </select>
+
+    <select id="filterBulan">
+      <option value="">📅 Semua Bulan</option>
+      <option>Januari</option>
+      <option>Februari</option>
+      <option>Maret</option>
+      <option>April</option>
+      <option>Mei</option>
+      <option>Juni</option>
+      <option>Juli</option>
+      <option>Agustus</option>
+      <option>September</option>
+      <option>Oktober</option>
+      <option>November</option>
+      <option>Desember</option>
+    </select>
+
+    <select id="filterTahun">
+      <option value="">🕓 Semua Tahun</option>
+      <option value="2023">2023</option>
+      <option value="2024">2024</option>
+      <option value="2025">2025</option>
+    </select>
+    <button id="resetFilter">🔄 Reset</button>
+  </div>
+
+  <!-- Bungkus tabel dalam wrapper -->
+  <div class="tabel-wrapper">
+    <table id="sampahTable" class="display table-style" style="width:100%">
+      <thead>
+        <tr>
+          <th>Nama Bank Sampah</th>
+          <th>Jenis Sampah</th>
+          <th>Bulan</th>
+          <th>Tahun</th>
+          <th>Volume</th>
+          <th>Harga</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT_rO4ilckv0NId74kcQP4fvkn9sTc5ckoQXA22tF-ezeD_fm2cA2doZ6r8YJtkhqWTHTAswclV6nvu/pub?gid=0&single=true&output=csv';
+
+    $(document).ready(function () {
+      Papa.parse(csvUrl, {
+        download: true,
+        header: true,
+        complete: function (results) {
+          const data = results.data;
+          const table = $('#sampahTable').DataTable({
+            data: data,
+            columns: [
+              { data: "Nama Bank Sampah" },
+              { data: "Jenis Sampah" },
+              { data: "Bulan" },
+              { data: "Tahun" },
+              { data: "Volume" },
+              { data: "Harga" }
+            ]
+          });
+
+          // Filter
+          $('#filterNama').on('keyup change', function () {
+            table.column(0).search(this.value).draw();
+          });
+          $('#filterJenis').on('change', function () {
+            table.column(1).search(this.value).draw();
+          });
+          $('#filterBulan').on('change', function () {
+            table.column(2).search(this.value).draw();
+          });
+          $('#filterTahun').on('change', function () {
+            table.column(3).search(this.value).draw();
+          });
+
+          $('#resetFilter').on('click', function () {
+            $('#filterNama').val('');
+            $('#filterJenis').val('');
+            $('#filterBulan').val('');
+            $('#filterTahun').val('');
+            table.search('').columns().search('').draw();
+          });
+        }
+      });
+    });
+  </script>
+
+  <!-- Edukasi Section
+  <section id="edukasi">
+  <h2>🧑‍🏫 Info Edukasi</h2>
+  <p class="intro">
+    Mari bersama wujudkan Desa Demangan yang bersih dan berkelanjutan!<br>
+    Di halaman ini, kamu bisa mempelajari berbagai informasi penting seputar pengelolaan sampah.
+  </p>
+
+  <div class="edukasi-content">
+    <div class="edukasi-box jenis-sampah">
+      <h3>♻️ Jenis-Jenis Sampah dan Cara Pemilahan</h3>
+      <ul>
+        <li><strong>Sampah Organik:</strong> sisa makanan, daun kering, kulit buah. ✅ Dapat diolah menjadi kompos.</li>
+        <li><strong>Sampah Anorganik:</strong> plastik, logam, kaca. ✅ Bisa didaur ulang jika dipilah dengan benar.</li>
+        <li><strong>Sampah B3 (Bahan Berbahaya dan Beracun):</strong> baterai, obat kedaluwarsa, elektronik rusak. </li>
+      </ul>
+    </div>
+
+    <div class="edukasi-box dampak-sampah">
+      <h3>🌍 Dampak Penumpukan Sampah</h3>
+      <ul>
+        <li>Banjir akibat saluran air tersumbat.</li>
+        <li>Polusi udara dan bau tak sedap.</li>
+        <li>Perkembangbiakan penyakit dan hewan pembawa kuman.</li>
+        <li>Pencemaran tanah dan air tanah.</li>
+      </ul>
+    </div>
+  </div>
+</section> -->
+
+  <!-- Script untuk baca data Google Sheets -->
+  <script>
+    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_rO4ilckv0NId74kcQP4fvkn9sTc5ckoQXA22tF-ezeD_fm2cA2doZ6r8YJtkhqWTHTAswclV6nvu/pub?gid=0&single=true&output=csv";
+
+    fetch(sheetURL)
+      .then(response => response.text())
+      .then(csv => {
+        const rows = csv.trim().split("\n").slice(1); // skip header
+        const bankSet = new Set();
+        let totalVolume = 0;
+        let totalHarga = 0;
+
+        rows.forEach(row => {
+          const cols = row.split(",");
+
+          const namaBank = cols[0]?.trim();
+          const volumeStr = cols[4]?.trim().replace(/[^\d.,-]/g, "").replace(",", ".");
+          const hargaStr = cols[5]?.trim().replace(/[^\d.,-]/g, "").replace(",", ".");
+
+          const volume = parseFloat(volumeStr) || 0;
+          const harga = parseFloat(hargaStr) || 0;
+
+          if (namaBank) bankSet.add(namaBank);
+          totalVolume += volume;
+          totalHarga += harga;
+        });
+
+        document.getElementById("jumlahBankSampah").textContent = bankSet.size;
+        document.getElementById("totalVolumeSampah").textContent = `${totalVolume.toLocaleString("id-ID")} Kg`;
+        document.getElementById("totalHarga").textContent = `Rp ${totalHarga.toLocaleString("id-ID")}`;
+      })
+      .catch(error => console.error("Gagal mengambil data:", error));
+  </script>
+
+
+  <!-- Galeri Gambar TPS -->
+  <section class="tps-section">
+    <h2><strong>Galeri</strong></h2>
+    <div class="tps-gallery">
+      <div class="tps-item">
+        <img src="img/Bank_Sampah.jpg" alt="TPS 1">
+        <p class="tps-label">Bank Sampah</p>
+      </div>
+      <div class="tps-item">
+        <img src="img/Penimbangan_Sampah.jpg" alt="TPS 2">
+        <p class="tps-label">Penimbangan Sampah</p>
+      </div>
+      <div class="tps-item">
+        <img src="img/Budidaya_Maggot.jpg" alt="TPS 3">
+        <p class="tps-label">Budidaya Maggot</p>
+      </div>
+    </div>
+  </section>
+
+
+
+  <footer>
+    <div class="footer-container">
+      <div class="footer-logo">🗑️ <strong>SiSADA</strong></div>
+      <p>&copy; 2025 SiSADA. All rights reserved.</p>
+      <p>Developed by Mahasiswa Sistem Informasi Geografis UGM</p>
+    </div>
+  </footer>
+
+  <!-- Toggle Menu Script -->
+  <script>
+    function toggleMenu() {
+      const nav = document.querySelector("header nav");
+      const toggle = document.querySelector(".menu-toggle");
+
+      nav.classList.toggle("show");
+
+      if (nav.classList.contains("show")) {
+        toggle.textContent = "✖";
+      } else {
+        toggle.textContent = "☰";
+      }
+    }
+  </script>
+
+</body>
+
+</html>
